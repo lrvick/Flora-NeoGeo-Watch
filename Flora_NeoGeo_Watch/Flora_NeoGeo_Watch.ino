@@ -41,6 +41,9 @@ float tripDistance;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, 6, NEO_GRB + NEO_KHZ800);
 
+// Overall brightness 0-255
+strip.setBrightness(1);
+
 // Offset hours from gps time (UTC)
 //const int offset = 1;   // Central European Time
 const int offset = -4;  // Eastern Daylight Time (USA)
@@ -81,14 +84,12 @@ long menuTime;
 float fLat = 0.0;
 float fLon = 0.0;
 
-void setup()
-{
+void setup() {
+
   // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
   // also spit it out
   Serial.begin(115200);
-  Serial.println("Adafruit GPS library basic test!");
 
-  // 9600 NMEA is the default baud rate for Adafruit MTK GPS's- some use 4800
   GPS.begin(9600);
   // uncomment this line to turn on RMC (recommended minimum) and GGA (fix data) including altitude
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
@@ -122,14 +123,15 @@ void setup()
   // Make input & enable pull-up resistors on switch pins for pushbutton
   pinMode(buttonPin, INPUT);
   digitalWrite(buttonPin, HIGH);
+
 }
 
 uint32_t gpsTimer = millis();
 uint32_t startupTimer = millis();
 uint32_t compassTimer = millis();
 
-void loop() // run over and over again
-{
+void loop() {
+
   compassCheck();
   // read the state of the switch into a local variable:
   int buttonState = digitalRead(buttonPin);
