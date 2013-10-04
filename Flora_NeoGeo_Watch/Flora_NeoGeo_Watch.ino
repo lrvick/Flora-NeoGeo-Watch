@@ -5,53 +5,42 @@
 #include <Wire.h>
 #include <LSM303.h>
 
-Adafruit_GPS GPS(&Serial1);
-LSM303 compass;
+// Set Latitude and longitude of desired destination
+#define GEO_LAT 44.998531
+#define GEO_LON -93.230322
 
-// Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
-// Set to 'true' if you want to debug and listen to the raw GPS sentences
-#define GPSECHO false
+// Your NeoPixel ring may not line up with ours
+// Enter which NeoPixel led is your top LED (0-15).
+#define TOP_LED 1
 
-//--------------------------------------------------|
-//                    WAYPOINT                      |
-//--------------------------------------------------|
-//Please enter the latitude and longitude of your   |
-//desired destination:                              |
-  #define GEO_LAT                44.998531
-  #define GEO_LON               -93.230322
-//--------------------------------------------------|
-//Your NeoPixel ring may not line up with ours.     |
-//Enter which NeoPixel led is your top LED (0-15).  |
-  #define TOP_LED                1
-//--------------------------------------------------|
-//Your compass module may not line up with ours.    |
-//Once you run compass mode, compare to a separate  |
-//compass (like one found on your smartphone).      |
-//Point your TOP_LED north, then count clockwise    |
-//how many LEDs away from TOP_LED the lit LED is    |
-  #define LED_OFFSET             0
-//--------------------------------------------------|
-
-// Navigation location
-float targetLat = GEO_LAT;
-float targetLon = GEO_LON;
-
-// Trip distance
-float tripDistance;
-
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, 6, NEO_GRB + NEO_KHZ800);
-
+// Your compass module may not line up with ours.
+// Once you run compass mode, compare to a separate
+// compass (like one found on your smartphone)
+// Point your TOP_LED north, then count clockwise
+// how many LEDs away from TOP_LED the lit LED is
+#define LED_OFFSET 0
 
 // Offset hours from gps time (UTC)
-//const int offset = 1;   // Central European Time
-const int offset = -4;  // Eastern Daylight Time (USA)
-//const int offset = -5;  // Central Daylight Time (USA)
-//const int offset = -8;  // Pacific Standard Time (USA)
-//const int offset = -7;  // Pacific Daylight Time (USA)
+#define UTC_OFFSET -4
 
+// Display brightness (low values conserve battery)
+#define BRIGHTNESS 1
+
+// Serial logging (GPS data etc)
+#define VERBOSE false
+
+
+Adafruit_GPS GPS(&Serial1);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, 6, NEO_GRB + NEO_KHZ800);
+LSM303 compass;
+
+float targetLat = GEO_LAT;
+float targetLon = GEO_LON;
+float tripDistance;
+const int utcOffset = UTC_OFFSET;
 int topLED = TOP_LED;
 int compassOffset = LED_OFFSET;
-
+int brightness = BRIGHTNESS;
 int lastMin = 16;
 int lastHour = 16;
 int startLED = 0;
@@ -64,20 +53,11 @@ int dirLED_r = 0;
 int dirLED_g = 0;
 int dirLED_b = 255;
 int compassReading;
-
-// Pushbutton setup
-int buttonPin = 10;             // the number of the pushbutton pin
+int buttonPin = 10;            // the number of the pushbutton pin
 int buttonState;               // the current reading from the input pin
 int lastButtonState = HIGH;    // the previous reading from the input pin
-long buttonHoldTime = 0;         // the last time the output pin was toggled
-long buttonHoldDelay = 500;      // how long to hold the button down
-
-// the following variables are long's because the time, measured in miliseconds,
-// will quickly become a bigger number than can be stored in an int.
-long lastDebounceTime = 0;     // the last time the output pin was toggled
-long debounceDelay = 50;       // the debounce time; increase if the output flickers
-long menuDelay = 2500;
-long menuTime;
+long buttonHoldTime = 0;       // the last time the output pin was toggled
+long buttonHoldDelay = 500;    // how long to hold the button down
 
 float fLat = 0.0;
 float fLon = 0.0;
@@ -85,8 +65,7 @@ float fLon = 0.0;
 void setup() {
 
 
-  // Overall brightness 0-255
-  strip.setBrightness(1);
+  strip.setBrightness(brightness);
 
   // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
   // also spit it out
@@ -148,7 +127,7 @@ void loop() {
   // read data from the GPS in the 'main loop'
   char c = GPS.read();
   // if you want to debug, this is a good time to do it!
-  if (GPSECHO)
+  if (VERBOSE)
     if (c) Serial.print(c);
   // if a sentence is received, we can check the checksum, parse it...
   if (GPS.newNMEAreceived()) {
@@ -168,7 +147,7 @@ void loop() {
       // set the Time to the latest GPS reading
       setTime(GPS.hour, GPS.minute, GPS.seconds, GPS.day, GPS.month, GPS.year);
       delay(50);
-      adjustTime(offset * SECS_PER_HOUR);
+      adjustTime(utcOffset * SECS_PER_HOUR);
       delay(500);
       tripDistance = (double)calc_dist(fLat, fLon, targetLat, targetLon);
       start = 1;
@@ -181,7 +160,7 @@ void loop() {
       // set the Time to the latest GPS reading
       setTime(GPS.hour, GPS.minute, GPS.seconds, GPS.day, GPS.month, GPS.year);
       delay(50);
-      adjustTime(offset * SECS_PER_HOUR);
+      adjustTime(utcOffset * SECS_PER_HOUR);
       delay(500);
     }
   }
@@ -214,7 +193,6 @@ void colorWipe(uint32_t c, uint8_t wait) {
 }
 
 void buttonCheck() {
-  menuTime = millis();
   int buttonState = digitalRead(buttonPin);
   if (buttonState == LOW && lastButtonState == HIGH) {
     buttonHoldTime = millis();
