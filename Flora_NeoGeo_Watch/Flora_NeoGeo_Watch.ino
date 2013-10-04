@@ -41,8 +41,6 @@ float tripDistance;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, 6, NEO_GRB + NEO_KHZ800);
 
-// Overall brightness 0-255
-strip.setBrightness(1);
 
 // Offset hours from gps time (UTC)
 //const int offset = 1;   // Central European Time
@@ -85,6 +83,10 @@ float fLat = 0.0;
 float fLon = 0.0;
 
 void setup() {
+
+
+  // Overall brightness 0-255
+  strip.setBrightness(1);
 
   // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
   // also spit it out
@@ -374,8 +376,8 @@ void navMode() {
   }
 }
 
-int calc_bearing(float flat1, float flon1, float flat2, float flon2)
-{
+int calc_bearing(float flat1, float flon1, float flat2, float flon2) {
+
   float calc;
   float bear_calc;
 
@@ -391,8 +393,9 @@ int calc_bearing(float flat1, float flon1, float flat2, float flon2)
   }
   return bear_calc;
 }
-void headingDistance(int fDist)
-{
+
+void headingDistance(int fDist) {
+
   //Use this part of the code to determine how far you are away from the destination.
   //The total trip distance (from where you started) is divided into five trip segments.
   float tripSegment = tripDistance/5;
@@ -436,8 +439,8 @@ void headingDistance(int fDist)
 }
 
 
-unsigned long calc_dist(float flat1, float flon1, float flat2, float flon2)
-{
+unsigned long calc_dist(float flat1, float flon1, float flat2, float flon2) {
+
   float dist_calc=0;
   float dist_calc2=0;
   float diflat=0;
@@ -459,6 +462,7 @@ unsigned long calc_dist(float flat1, float flon1, float flat2, float flon2)
 
   dist_calc*=6371000.0; //Converting to meters
   return dist_calc;
+
 }
 
 // Convert NMEA coordinate to decimal degrees
@@ -492,8 +496,8 @@ void compassCheck() {
     }
 }
 
-void compassDirection(int compassHeading)
-{
+void compassDirection(int compassHeading) {
+
   //Serial.print("Compass Direction: ");
   //Serial.println(compassHeading);
 
@@ -691,4 +695,5 @@ void compassDirection(int compassHeading)
     strip.show();
     lastDir = ledDir;
   }
+
 }
