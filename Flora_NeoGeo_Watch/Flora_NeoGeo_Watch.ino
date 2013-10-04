@@ -72,7 +72,7 @@ int buttonPin = 10;             // the number of the pushbutton pin
 int buttonState;               // the current reading from the input pin
 int lastButtonState = HIGH;    // the previous reading from the input pin
 long buttonHoldTime = 0;         // the last time the output pin was toggled
-long buttonHoldDelay = 2500;      // how long to hold the button down
+long buttonHoldDelay = 500;      // how long to hold the button down
 
 // the following variables are long's because the time, measured in miliseconds,
 // will quickly become a bigger number than can be stored in an int.
