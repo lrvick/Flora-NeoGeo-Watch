@@ -1,34 +1,10 @@
 #include <Adafruit_GPS.h>
 #include <Adafruit_NeoPixel.h>
 #include <SoftwareSerial.h>
-#include <Time.h>
 #include <Wire.h>
 #include <LSM303.h>
-
-// Set Latitude and longitude of desired destination
-#define GEO_LAT 44.998531
-#define GEO_LON -93.230322
-
-// Your NeoPixel ring may not line up with ours
-// Enter which NeoPixel led is your top LED (0-15).
-#define TOP_LED 1
-
-// Your compass module may not line up with ours.
-// Once you run compass mode, compare to a separate
-// compass (like one found on your smartphone)
-// Point your TOP_LED north, then count clockwise
-// how many LEDs away from TOP_LED the lit LED is
-#define LED_OFFSET 0
-
-// Offset hours from gps time (UTC)
-#define UTC_OFFSET -4
-
-// Display brightness (low values conserve battery)
-#define BRIGHTNESS 1
-
-// Serial logging (GPS data etc)
-#define VERBOSE false
-
+#include <Time.h>
+#include "config.h"
 
 Adafruit_GPS GPS(&Serial1);
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, 6, NEO_GRB + NEO_KHZ800);
@@ -43,9 +19,9 @@ int compassOffset = LED_OFFSET;
 int brightness = BRIGHTNESS;
 int lastMin = 16;
 int lastHour = 16;
+int lastCombined = 0;
 int startLED = 0;
 int startLEDlast = 16;
-int lastCombined = 0;
 int start = 0;
 int mode = 0;
 int lastDir = 16;
@@ -57,13 +33,16 @@ int buttonPin = 10;            // the number of the pushbutton pin
 int buttonState;               // the current reading from the input pin
 int lastButtonState = HIGH;    // the previous reading from the input pin
 long buttonHoldTime = 0;       // the last time the output pin was toggled
-long buttonHoldDelay = 500;    // how long to hold the button down
+long buttonHoldDelay = BUTTON_HOLD_DELAY;
 
 float fLat = 0.0;
 float fLon = 0.0;
 
-void setup() {
+uint32_t gpsTimer = millis();
+uint32_t startupTimer = millis();
+uint32_t compassTimer = millis();
 
+void setup() {
 
   strip.setBrightness(brightness);
 
@@ -88,11 +67,12 @@ void setup() {
 
   compass.init();
   compass.enableDefault();
-
-  // Calibration values. Use the Calibrate example program to get the values for
-  // your compass.
-  compass.m_min.x = -809; compass.m_min.y = -491; compass.m_min.z = -793;
-  compass.m_max.x = +451; compass.m_max.y = +697; compass.m_max.z = 438;
+  compass.m_min.x = COMPASS_MIN_X;
+  compass.m_min.y = COMPASS_MIN_Y;
+  compass.m_min.z = COMPASS_MIN_Z;
+  compass.m_max.x = COMPASS_MAX_X;
+  compass.m_max.y = COMPASS_MAX_Y;
+  compass.m_max.z = COMPASS_MAX_Z;
 
   delay(1000);
   // Ask for firmware version
@@ -107,9 +87,6 @@ void setup() {
 
 }
 
-uint32_t gpsTimer = millis();
-uint32_t startupTimer = millis();
-uint32_t compassTimer = millis();
 
 void loop() {
 
@@ -205,13 +182,11 @@ void buttonCheck() {
         mode = 0;
         lastMin = 16;
         lastHour = 16;
-        colorWipe(strip.Color(0, 0, 0), 20);
-        buttonHoldTime = millis();
       } else {
         mode = mode + 1;
-        colorWipe(strip.Color(0, 0, 0), 20);
-        buttonHoldTime = millis();
       }
+      colorWipe(strip.Color(0, 0, 0), 20);
+      buttonHoldTime = millis();
     }
   }
 }
