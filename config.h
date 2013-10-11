@@ -11,7 +11,7 @@
 // compass (like one found on your smartphone)
 // Point your TOP_LED north, then count clockwise
 // how many LEDs away from TOP_LED the lit LED is
-#define LED_OFFSET 0
+#define LED_OFFSET -2
 
 // how long to hold the button down (ms)
 #define BUTTON_HOLD_DELAY 500
@@ -27,9 +27,9 @@
 
 // Calibration values. Use the Calibrate example
 // program to get the values for your compass.
-#define COMPASS_MIN_X -809
-#define COMPASS_MIN_Y -491
-#define COMPASS_MIN_Z -793
-#define COMPASS_MAX_X +451
-#define COMPASS_MAX_Y +697
-#define COMPASS_MAX_Z 438
+#define COMPASS_MIN_X -687
+#define COMPASS_MIN_Y -326
+#define COMPASS_MIN_Z -366
+#define COMPASS_MAX_X 433
+#define COMPASS_MAX_Y 686
+#define COMPASS_MAX_Z 662
