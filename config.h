@@ -23,7 +23,7 @@
 #define BRIGHTNESS 2
 
 // Serial logging (GPS data etc)
-#define VERBOSE false
+#define VERBOSE true
 
 // Calibration values. Use the Calibrate example
 // program to get the values for your compass.
